@@ -1,6 +1,7 @@
 package com.example.microservice.componentProcessor.controller;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,25 +14,51 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.microservice.componentProcessor.service.ComponentProcessorServices;
+import com.example.microservice.componentProcessor.service.impl.AccessoryComponentProcessorService;
+import com.example.microservice.componentProcessor.service.impl.IntegralComponentProcessorService;
 
 @RestController
 @RequestMapping("v1/componentproceessor")
 public class ComponentProcessorController {
 	
-	@Autowired
-	ComponentProcessorServices componentProcessorServices;
+	public static final String INTEGRAL = "Integral";
+	public static final String ACCESSORY = "Accessory";
 	
+	@Autowired
+	IntegralComponentProcessorService integralcomponentProcessorServices;
+	
+	@Autowired
+	AccessoryComponentProcessorService accessoryComponentProcessorService;
 	
 	@GetMapping("/getdetails")
 	public ResponseEntity<?> getProcessingDetails(@RequestParam("type") String productType , @RequestParam("quantity") int qty , @CookieValue("token") String jwtToken ){
 		
-		Map<String , Object> isTokenValid = componentProcessorServices.verifyJWTToken(jwtToken);
-		if((boolean)isTokenValid.get("errors") != false && (boolean)isTokenValid.get("isTokenValid") == true) {
-			//call for next function TBD
+		Map<String , Object> response = new HashMap<String , Object>();
+		if(productType.equalsIgnoreCase(INTEGRAL)) {
+			try {
+				Map<String , Object> isTokenValid = integralcomponentProcessorServices.verifyJWTToken(jwtToken);
+				System.out.println("controller"+isTokenValid);
+				if((boolean)isTokenValid.get("errors") == false && (boolean)isTokenValid.get("isTokenValid") == true) {
+					try {
+						response = integralcomponentProcessorServices.getComponentProcessingDetails(productType, qty);
+						response.put("errors", false);
+						System.out.println(response);
+					}catch(Exception e) {
+						response.put("errors" , true);
+						response.put("errorMessage", "Something went wrong !!!!");
+					}
+				}else {
+					response.put("errors" , true);
+					response.put("errorMessage", "Authorisation failed");
+				}
+			}catch(Exception e) {
+				response.put("errors" , true);
+				response.put("errorMessage", " Something went wrong!!!");
+			}
 		}
-		System.out.println("validity" + isTokenValid);
-		return null;
+
+		//System.out.println("validity" + isTokenValid);
+		return ResponseEntity.ok(response);
 	}
 	
 	@PostMapping("/createreturnOrder")
