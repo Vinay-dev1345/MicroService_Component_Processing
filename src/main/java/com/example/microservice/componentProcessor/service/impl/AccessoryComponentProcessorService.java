@@ -104,9 +104,5 @@ public class AccessoryComponentProcessorService implements ComponentProcessor {
 		return componentProcessResponse;
 	}
 
-	@Override
-	public void createReturnOrder() {
-
-	}
 
 }

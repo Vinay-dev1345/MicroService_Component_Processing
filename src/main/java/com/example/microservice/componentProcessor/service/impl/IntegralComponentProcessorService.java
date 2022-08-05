@@ -103,8 +103,4 @@ public class IntegralComponentProcessorService implements ComponentProcessor {
 		return componentProcessResponse;
 	}
 
-	@Override
-	public void createReturnOrder() {
-
-	}
 }

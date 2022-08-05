@@ -4,10 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.microservice.componentProcessor.entity.ComponentProcessorEntity;
+import com.example.microservice.componentProcessor.entity.ComponentOrderProcessorEntity;
 
 @Transactional
 @Repository
-public interface ComponentProcessorRepository extends JpaRepository<ComponentProcessorEntity, String> {
+public interface ComponentProcessorRepository extends JpaRepository<ComponentOrderProcessorEntity, String> {
 
 }
