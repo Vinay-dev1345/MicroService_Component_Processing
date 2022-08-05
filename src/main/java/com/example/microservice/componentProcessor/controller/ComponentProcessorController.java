@@ -56,6 +56,32 @@ public class ComponentProcessorController {
 				response.put("errorMessage", " Something went wrong!!!");
 			}
 		}
+		else if(productType.equalsIgnoreCase(ACCESSORY)) {
+			try {
+				Map<String , Object> isTokenValid =accessoryComponentProcessorService .verifyJWTToken(jwtToken);
+				System.out.println("controller"+isTokenValid);
+				if((boolean)isTokenValid.get("errors") == false && (boolean)isTokenValid.get("isTokenValid") == true) {
+					try {
+						response = accessoryComponentProcessorService.getComponentProcessingDetails(productType, qty);
+						response.put("errors", false);
+						System.out.println(response);
+					}catch(Exception e) {
+						response.put("errors" , true);
+						response.put("errorMessage", "Something went wrong !!!!");
+					}
+				}else {
+					response.put("errors" , true);
+					response.put("errorMessage", "Authorisation failed");
+				}
+			}catch(Exception e) {
+				response.put("errors" , true);
+				response.put("errorMessage", " Something went wrong!!!");
+			}
+		}
+		else {
+			response.put("errors" , true);
+			response.put("errorMessage", " Invalid Arguments");
+		}
 
 		//System.out.println("validity" + isTokenValid);
 		return ResponseEntity.ok(response);

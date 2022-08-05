@@ -87,7 +87,7 @@ public class IntegralComponentProcessorService implements ComponentProcessor {
 	    
 	    //Cost Compute and Map
 		double pdCost = jso.getJsonNumber("packagingAndDeliveryCost").doubleValue();
-		double repairCost = 500.00; //need to be mapped with api response
+		double repairCost = jso.getJsonNumber("processingCost").doubleValue();
 		double totalCost = pdCost + repairCost;
 		
 		componentProcessingCost.put("processingCost",repairCost);
