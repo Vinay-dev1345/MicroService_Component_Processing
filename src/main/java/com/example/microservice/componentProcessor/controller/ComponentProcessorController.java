@@ -101,7 +101,7 @@ public class ComponentProcessorController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@CrossOrigin(origins = "http://localhost:4200")
+	@CrossOrigin(origins = "http://localhost:4200" , allowCredentials = "true")
 	@PostMapping("/createreturnorder")
 	public ResponseEntity<?> initiateReturnOrder(@RequestBody String order, @CookieValue("token") String jwtToken){
 		Map<String , Object> responseBody = new HashMap<String , Object>();
