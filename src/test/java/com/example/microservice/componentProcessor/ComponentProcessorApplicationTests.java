@@ -4,13 +4,21 @@ package com.example.microservice.componentProcessor;
 import static org.mockito.Mockito.*;
 
 import java.io.StringReader;
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,8 +32,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.microservice.componentProcessor.controller.ComponentProcessorController;
+import com.example.microservice.componentProcessor.entity.ComponentOrderProcessorEntity;
 import com.example.microservice.componentProcessor.repository.ComponentProcessorRepository;
 import com.example.microservice.componentProcessor.service.impl.AccessoryComponentProcessorService;
+import com.example.microservice.componentProcessor.service.impl.ComponentOrderProcessorService;
 import com.example.microservice.componentProcessor.service.impl.IntegralComponentProcessorService;
 
 @SpringBootTest
@@ -38,11 +49,23 @@ class ComponentProcessorApplicationTests {
 	@Mock
 	RestTemplate restTemplate;
 	
+	@Mock
+	JsonObject jso;
+	
+	@Mock
+	ComponentOrderProcessorEntity order;
+	
 	@InjectMocks
 	AccessoryComponentProcessorService accessoryComponentProcessorService;
 	
 	@InjectMocks
 	IntegralComponentProcessorService integralComponentProcessorService;
+	
+	@InjectMocks
+	ComponentOrderProcessorService componentOrderProcessorService;
+	
+	@InjectMocks
+	ComponentProcessorController componentProcessorController;
 	
 	@Test
 	public void verifyJWTAuthorisationForAccessoryComponentProcessorService() {
@@ -101,6 +124,89 @@ class ComponentProcessorApplicationTests {
 		Map<String, Object> actualResponse = integralComponentProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(false, actualResponse.get("isTokenValid"));
 	}
+	
+	@Test
+	public void verifyJWTAuthorisationForComponentOrderProcessorService() {
+		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
+		Map<String, Object> actualResponse = componentOrderProcessorService.verifyJWTToken("sampleToken");
+		Assertions.assertEquals(true, actualResponse.get("isTokenValid"));
+	}
+	
+	@Test
+	public void verifyJWTFailedAuthorisationForComponentOrderProcessorService() {
+		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
+		Map<String, Object> actualResponse = componentOrderProcessorService.verifyJWTToken("sampleToken");
+		Assertions.assertEquals(false, actualResponse.get("isTokenValid"));
+	}
+	
+	@Test
+	public void verifyWhetherTheOrderIsSavedOrNot() {
+		String sampleOrderBody = "{\"isConversionToOrder\":true,\"orderId\":\"61966234\",\"customerDetails\":{\"customerName\":\"jane\",\"contactNumber\":\"+910876544211\"},\"componentDetails\":{\"componentType\":\"accessory\",\"componentName\":\"vacfridge1\",\"extraDetails\":\"fanproblem\",\"qty\":1},\"costingDetails\":{\"packagingAndDeliveryCost\":350.00,\"processingCost\":500.00},\"dateOfDelivery\":\"MonAug0800:51:34IST2022\"}";
+		JsonReader jsr = Json.createReader(new StringReader(sampleOrderBody));
+		JsonObject jso = jsr.readObject();
+		jsr.close();
+		
+		Map<String, Object> actualResponse = componentOrderProcessorService.createReturnOrder(jso);
+		Assertions.assertEquals(true, actualResponse.get("isSavedSuccessfully"));
+		Assertions.assertEquals(850.00, actualResponse.get("totalCost"));
+		Assertions.assertEquals(false, actualResponse.get("errors"));	
+	}
+	
+	@Test
+	@Disabled("issue")
+	public void verifyGetProcessingDetailsForIntegralComponent() {
+		doNothing().when(integralComponentProcessorService.verifyJWTToken("token"));
+		when(integralComponentProcessorService.getComponentProcessingDetails("Integral", 1)).thenReturn(Collections.EMPTY_MAP);
+		ResponseEntity<?> actualResponse = componentProcessorController.getProcessingDetails("Integral", 1 , "token");
+		Map<String , Object> response = (Map<String, Object>) actualResponse.getBody();
+		
+		Assertions.assertEquals(true , response.get("errors"));
+	}
+	
+	@Test
+	@Disabled("issue")
+	public void verifyGetProcessingDetailsWhenExceptionIsThrownForAccessoryComponent() {
+		when(accessoryComponentProcessorService.verifyJWTToken("token")).thenThrow(Exception.class);
+		ResponseEntity<?> actualResponse = componentProcessorController.getProcessingDetails("Accessory", 1 , "token");
+		String response = (String)actualResponse.getBody();
+		
+		JsonReader jsr = Json.createReader(new StringReader(response));
+		JsonObject jso = jsr.readObject();
+		jsr.close();
+		
+		Assertions.assertEquals(true , jso.getString("errors"));
+	}
+	
+	@Test
+	public void verifyGetProcessingDetailsWhenInValidComponent() {
+		ResponseEntity<?> actualResponse = componentProcessorController.getProcessingDetails("undefined", 1 , "token");
+		Map<String , Object> response = (Map<String, Object>) actualResponse.getBody();
+		
+		Assertions.assertEquals(true , response.get("errors"));
+	}
+	
+	@Test
+	public void verifyGetProcessingDetailsWhenOrderCreationIsFailed() {
+		String body = "{\"isConversionToOrder\":false,\"orderId\":\"61966234\",\"customerDetails\":{\"customerName\":\"jane\",\"contactNumber\":\"+910876544211\"},\"componentDetails\":{\"componentType\":\"accessory\",\"componentName\":\"vacfridge1\",\"extraDetails\":\"fanproblem\",\"qty\":1},\"costingDetails\":{\"packagingAndDeliveryCost\":350.00,\"processingCost\":500.00},\"dateOfDelivery\":\"MonAug0800:51:34IST2022\"}";
+		ResponseEntity<?> actualResponse = componentProcessorController.initiateReturnOrder(body , "token");
+		Map<String , Object> response = (Map<String, Object>) actualResponse.getBody();
+		
+		Assertions.assertEquals(true , response.get("errors"));
+	}
+	
+	@Test
+	public void verifyGetProcessingDetailsWhenOrderCreationIsFailedAtTheCreationProcess() {
+		String body = "{\"isConversionToOrder\":true,\"orderId\":\"\",\"customerDetails\":{\"customerName\":\"THOR\",\"contactNumber\":\"+910876544211\"},\"componentDetails\":{\"componentType\":\"accessory\",\"componentName\":\"vacfridge1\",\"extraDetails\":\"fanproblem\",\"qty\":1},\"costingDetails\":{\"packagingAndDeliveryCost\":350.00,\"processingCost\":500.00},\"dateOfDelivery\":\"MonAug0800:51:34IST2022\"}";
+		ResponseEntity<?> actualResponse = componentProcessorController.initiateReturnOrder(body , "token");
+		Map<String , Object> response = (Map<String, Object>) actualResponse.getBody();
+		
+		Assertions.assertEquals(true , response.get("errors"));
+	}
+	
 	
 	
 

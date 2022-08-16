@@ -72,7 +72,7 @@ public class ComponentProcessorController {
 		}
 		else if(productType.equalsIgnoreCase(ACCESSORY)) {
 			try {
-				Map<String , Object> isTokenValid =accessoryComponentProcessorService .verifyJWTToken(jwtToken);
+				Map<String , Object> isTokenValid =accessoryComponentProcessorService.verifyJWTToken(jwtToken);
 				System.out.println("controller"+isTokenValid);
 				if((boolean)isTokenValid.get("errors") == false && (boolean)isTokenValid.get("isTokenValid") == true) {
 					try {
