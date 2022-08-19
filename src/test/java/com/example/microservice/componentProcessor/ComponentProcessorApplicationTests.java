@@ -32,6 +32,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.microservice.componentProcessor.Proxy.AuthClient;
+import com.example.microservice.componentProcessor.Proxy.CostComputeClient;
 import com.example.microservice.componentProcessor.controller.ComponentProcessorController;
 import com.example.microservice.componentProcessor.entity.ComponentOrderProcessorEntity;
 import com.example.microservice.componentProcessor.repository.ComponentProcessorRepository;
@@ -46,8 +48,14 @@ class ComponentProcessorApplicationTests {
 	@Mock
 	ComponentProcessorRepository componentProcessorRepository;
 	
+//	@Mock
+//	RestTemplate restTemplate;
+	
 	@Mock
-	RestTemplate restTemplate;
+	AuthClient authClient;
+	
+	@Mock
+	CostComputeClient costComputeClient;
 	
 	@Mock
 	JsonObject jso;
@@ -69,9 +77,10 @@ class ComponentProcessorApplicationTests {
 	
 	@Test
 	public void verifyJWTAuthorisationForAccessoryComponentProcessorService() {
-		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
+//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+//                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
+		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":true}");
 		Map<String, Object> actualResponse = accessoryComponentProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(true, actualResponse.get("isTokenValid"));
 	}
@@ -79,9 +88,10 @@ class ComponentProcessorApplicationTests {
 	@Test
 	public void verifyProcessingDetailsResponseForAccessoryComponentService() {
 		String responseBody = "{\"processingCost\":300.0,\"packagingAndDeliveryCost\":200.0,\"errors\":false}";
-		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-                .thenReturn(new ResponseEntity<>(responseBody, HttpStatus.OK));
+//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+//                .thenReturn(new ResponseEntity<>(responseBody, HttpStatus.OK));
+		when(this.costComputeClient.getComponentCost((String) any(), (String) any())).thenReturn(responseBody);
 		Map<String , Object> actualResponse = accessoryComponentProcessorService.getComponentProcessingDetails("Accessory", 1);
 		Map<String, Object> actualTotalCostObtained = (Map<String, Object>) actualResponse.get("cost");
 		Assertions.assertEquals(500.00, actualTotalCostObtained.get("totalCost"));
@@ -89,18 +99,20 @@ class ComponentProcessorApplicationTests {
 	
 	@Test
 	public void verifyJWTAuthorisationFailedForAccessoryComponentProcessorService() {
-		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
+//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+//                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
+		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":false}");
 		Map<String, Object> actualResponse = accessoryComponentProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(false, actualResponse.get("isTokenValid"));
 	}
 	
 	@Test
 	public void verifyJWTAuthorisationForIntegralComponentProcessorService() {
-		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
+//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+//                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
+		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":true}");
 		Map<String, Object> actualResponse = integralComponentProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(true, actualResponse.get("isTokenValid"));
 	}
@@ -108,9 +120,10 @@ class ComponentProcessorApplicationTests {
 	@Test
 	public void verifyProcessingDetailsResponseForIntegralComponentService() {
 		String responseBody = "{\"processingCost\":500.0,\"packagingAndDeliveryCost\":350.0,\"errors\":false}";
-		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-                .thenReturn(new ResponseEntity<>(responseBody, HttpStatus.OK));
+//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+//                .thenReturn(new ResponseEntity<>(responseBody, HttpStatus.OK));
+		when(this.costComputeClient.getComponentCost((String) any(), (String) any())).thenReturn(responseBody);
 		Map<String , Object> actualResponse = integralComponentProcessorService.getComponentProcessingDetails("Accessory", 1);
 		Map<String, Object> actualTotalCostObtained = (Map<String, Object>) actualResponse.get("cost");
 		Assertions.assertEquals(850.00, actualTotalCostObtained.get("totalCost"));
@@ -118,27 +131,30 @@ class ComponentProcessorApplicationTests {
 	
 	@Test
 	public void verifyJWTAuthorisationFailedForIntegralComponentProcessorService() {
-		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
+//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+//                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
+		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":false}");
 		Map<String, Object> actualResponse = integralComponentProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(false, actualResponse.get("isTokenValid"));
 	}
 	
 	@Test
 	public void verifyJWTAuthorisationForComponentOrderProcessorService() {
-		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
+//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+//                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
+		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":true}");
 		Map<String, Object> actualResponse = componentOrderProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(true, actualResponse.get("isTokenValid"));
 	}
 	
 	@Test
 	public void verifyJWTFailedAuthorisationForComponentOrderProcessorService() {
-		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
+//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
+//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
+//                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
+		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":false}");
 		Map<String, Object> actualResponse = componentOrderProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(false, actualResponse.get("isTokenValid"));
 	}

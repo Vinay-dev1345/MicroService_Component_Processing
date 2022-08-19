@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.microservice.componentProcessor.Proxy.AuthClient;
 import com.example.microservice.componentProcessor.entity.ComponentOrderProcessorEntity;
 import com.example.microservice.componentProcessor.repository.ComponentProcessorRepository;
 import com.example.microservice.componentProcessor.service.dao.ComponentOrderProcessor;
@@ -28,22 +29,27 @@ public class ComponentOrderProcessorService implements ComponentOrderProcessor {
 	
 	public static final String JWTAUTORISATIONENDPOINT = "http://localhost:9001/v1/authorize/user/";
 	
-	@Autowired
-	RestTemplate restTemplate;
+//	@Autowired
+//	RestTemplate restTemplate;
 	
 	@Autowired
 	ComponentProcessorRepository componentProcessorRepository;
+	
+	@Autowired
+	AuthClient authClient;
 	
 	@Override
 	public Map<String, Object> verifyJWTToken(String token) {
 		Map<String , Object> jwtResponse = new HashMap<String , Object>();
 		try {
-			HttpHeaders headers = new HttpHeaders();
-			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-			HttpEntity<String> entity = new HttpEntity<String>(headers);
-
-			String requestUrl = JWTAUTORISATIONENDPOINT + token;
-			String response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class).getBody();
+//			HttpHeaders headers = new HttpHeaders();
+//			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+//			HttpEntity<String> entity = new HttpEntity<String>(headers);
+//
+//			String requestUrl = JWTAUTORISATIONENDPOINT + token;
+//			String response = restTemplate.exchange(requestUrl, HttpMethod.GET, entity, String.class).getBody();
+			
+			String response = authClient.getTokenValidity(token);
 			
 			System.out.println(response);
 			JsonReader jsr = Json.createReader(new StringReader(response));
