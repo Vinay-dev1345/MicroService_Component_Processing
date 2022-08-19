@@ -11,12 +11,14 @@ import javax.json.JsonReader;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,8 +44,8 @@ public class ComponentProcessorController {
 	ComponentOrderProcessorService componentOrderProcessorService;
 	
 	@CrossOrigin(origins = "http://localhost:4200" , allowCredentials = "true")
-	@GetMapping("/getdetails")
-	public ResponseEntity<?> getProcessingDetails(@RequestParam("type") String productType , @RequestParam("quantity") int qty , @CookieValue("token") String jwtToken ){
+	@GetMapping(value="/getdetails" , produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<?> getProcessingDetails(@RequestParam("type") String productType , @RequestParam("quantity") int qty , @RequestHeader(value = "Authorization") String jwtToken ){
 		
 		Map<String , Object> response = new HashMap<String , Object>();
 		if(productType.equalsIgnoreCase(INTEGRAL)) {
@@ -102,8 +104,8 @@ public class ComponentProcessorController {
 	}
 	
 	@CrossOrigin(origins = "http://localhost:4200" , allowCredentials = "true")
-	@PostMapping("/createreturnorder")
-	public ResponseEntity<?> initiateReturnOrder(@RequestBody String order, @CookieValue("token") String jwtToken){
+	@PostMapping(value="/createreturnorder" , produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<?> initiateReturnOrder(@RequestBody String order, @RequestHeader(value = "Authorization") String jwtToken){
 		Map<String , Object> responseBody = new HashMap<String , Object>();
 		
 		JsonReader jsr = Json.createReader(new StringReader(order));
