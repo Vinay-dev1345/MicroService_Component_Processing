@@ -48,9 +48,6 @@ class ComponentProcessorApplicationTests {
 	@Mock
 	ComponentProcessorRepository componentProcessorRepository;
 	
-//	@Mock
-//	RestTemplate restTemplate;
-	
 	@Mock
 	AuthClient authClient;
 	
@@ -77,9 +74,6 @@ class ComponentProcessorApplicationTests {
 	
 	@Test
 	public void verifyJWTAuthorisationForAccessoryComponentProcessorService() {
-//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-//                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
 		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":true}");
 		Map<String, Object> actualResponse = accessoryComponentProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(true, actualResponse.get("isTokenValid"));
@@ -88,9 +82,6 @@ class ComponentProcessorApplicationTests {
 	@Test
 	public void verifyProcessingDetailsResponseForAccessoryComponentService() {
 		String responseBody = "{\"processingCost\":300.0,\"packagingAndDeliveryCost\":200.0,\"errors\":false}";
-//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-//                .thenReturn(new ResponseEntity<>(responseBody, HttpStatus.OK));
 		when(this.costComputeClient.getComponentCost((String) any(), (String) any())).thenReturn(responseBody);
 		Map<String , Object> actualResponse = accessoryComponentProcessorService.getComponentProcessingDetails("Accessory", 1);
 		Map<String, Object> actualTotalCostObtained = (Map<String, Object>) actualResponse.get("cost");
@@ -99,9 +90,6 @@ class ComponentProcessorApplicationTests {
 	
 	@Test
 	public void verifyJWTAuthorisationFailedForAccessoryComponentProcessorService() {
-//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-//                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
 		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":false}");
 		Map<String, Object> actualResponse = accessoryComponentProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(false, actualResponse.get("isTokenValid"));
@@ -109,9 +97,6 @@ class ComponentProcessorApplicationTests {
 	
 	@Test
 	public void verifyJWTAuthorisationForIntegralComponentProcessorService() {
-//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-//                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
 		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":true}");
 		Map<String, Object> actualResponse = integralComponentProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(true, actualResponse.get("isTokenValid"));
@@ -120,9 +105,6 @@ class ComponentProcessorApplicationTests {
 	@Test
 	public void verifyProcessingDetailsResponseForIntegralComponentService() {
 		String responseBody = "{\"processingCost\":500.0,\"packagingAndDeliveryCost\":350.0,\"errors\":false}";
-//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-//                .thenReturn(new ResponseEntity<>(responseBody, HttpStatus.OK));
 		when(this.costComputeClient.getComponentCost((String) any(), (String) any())).thenReturn(responseBody);
 		Map<String , Object> actualResponse = integralComponentProcessorService.getComponentProcessingDetails("Accessory", 1);
 		Map<String, Object> actualTotalCostObtained = (Map<String, Object>) actualResponse.get("cost");
@@ -131,9 +113,6 @@ class ComponentProcessorApplicationTests {
 	
 	@Test
 	public void verifyJWTAuthorisationFailedForIntegralComponentProcessorService() {
-//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-//                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
 		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":false}");
 		Map<String, Object> actualResponse = integralComponentProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(false, actualResponse.get("isTokenValid"));
@@ -141,9 +120,6 @@ class ComponentProcessorApplicationTests {
 	
 	@Test
 	public void verifyJWTAuthorisationForComponentOrderProcessorService() {
-//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-//                .thenReturn(new ResponseEntity<>("{\"isValid\":true}", HttpStatus.OK));
 		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":true}");
 		Map<String, Object> actualResponse = componentOrderProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(true, actualResponse.get("isTokenValid"));
@@ -151,9 +127,6 @@ class ComponentProcessorApplicationTests {
 	
 	@Test
 	public void verifyJWTFailedAuthorisationForComponentOrderProcessorService() {
-//		when(this.restTemplate.exchange((String) any(), (org.springframework.http.HttpMethod) any(),
-//                (org.springframework.http.HttpEntity<Object>) any(), (Class<Object>) any(), (Object[]) any()))
-//                .thenReturn(new ResponseEntity<>("{\"isValid\":false}", HttpStatus.OK));
 		when(this.authClient.getTokenValidity((String) any())).thenReturn("{\"isValid\":false}");
 		Map<String, Object> actualResponse = componentOrderProcessorService.verifyJWTToken("sampleToken");
 		Assertions.assertEquals(false, actualResponse.get("isTokenValid"));
@@ -170,31 +143,6 @@ class ComponentProcessorApplicationTests {
 		Assertions.assertEquals(true, actualResponse.get("isSavedSuccessfully"));
 		Assertions.assertEquals(850.00, actualResponse.get("totalCost"));
 		Assertions.assertEquals(false, actualResponse.get("errors"));	
-	}
-	
-	@Test
-	@Disabled("issue")
-	public void verifyGetProcessingDetailsForIntegralComponent() {
-		doNothing().when(integralComponentProcessorService.verifyJWTToken("token"));
-		when(integralComponentProcessorService.getComponentProcessingDetails("Integral", 1)).thenReturn(Collections.EMPTY_MAP);
-		ResponseEntity<?> actualResponse = componentProcessorController.getProcessingDetails("Integral", 1 , "token");
-		Map<String , Object> response = (Map<String, Object>) actualResponse.getBody();
-		
-		Assertions.assertEquals(true , response.get("errors"));
-	}
-	
-	@Test
-	@Disabled("issue")
-	public void verifyGetProcessingDetailsWhenExceptionIsThrownForAccessoryComponent() {
-		when(accessoryComponentProcessorService.verifyJWTToken("token")).thenThrow(Exception.class);
-		ResponseEntity<?> actualResponse = componentProcessorController.getProcessingDetails("Accessory", 1 , "token");
-		String response = (String)actualResponse.getBody();
-		
-		JsonReader jsr = Json.createReader(new StringReader(response));
-		JsonObject jso = jsr.readObject();
-		jsr.close();
-		
-		Assertions.assertEquals(true , jso.getString("errors"));
 	}
 	
 	@Test

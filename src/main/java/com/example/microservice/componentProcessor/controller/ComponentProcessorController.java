@@ -9,6 +9,8 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.microservice.componentProcessor.ComponentProcessorApplication;
 import com.example.microservice.componentProcessor.service.impl.AccessoryComponentProcessorService;
 import com.example.microservice.componentProcessor.service.impl.ComponentOrderProcessorService;
 import com.example.microservice.componentProcessor.service.impl.IntegralComponentProcessorService;
@@ -30,6 +33,7 @@ import com.example.microservice.componentProcessor.service.impl.IntegralComponen
 @RestController
 @RequestMapping("v1/componentproceessor")
 public class ComponentProcessorController {
+	private static Logger logger = LoggerFactory.getLogger(ComponentProcessorApplication.class);
 	
 	public static final String INTEGRAL = "Integral";
 	public static final String ACCESSORY = "Accessory";
@@ -54,20 +58,28 @@ public class ComponentProcessorController {
 				System.out.println("controller"+isTokenValid);
 				if((boolean)isTokenValid.get("errors") == false && (boolean)isTokenValid.get("isTokenValid") == true) {
 					try {
+						
+						logger.info("User is Authorised Successfully");
 						response = integralcomponentProcessorServices.getComponentProcessingDetails(productType, qty);
 						response.put("errors", false);
-						System.out.println("order"+response);
+						logger.info("Costing Details is as follows : "+response);
+						
 					}catch(Exception e) {
-						System.out.println(e.toString());
+						
+						logger.warn(e.toString());
 						response.put("errors" , true);
 						response.put("errorMessage", "Something went wrong !!!!");
+						
 					}
 				}else {
+					
+					logger.info("User is Not Authorised Successfully !!!");
 					response.put("errors" , true);
 					response.put("errorMessage", "Authorisation failed");
 				}
 			}catch(Exception e) {
-				System.out.println(e.toString());
+				
+				logger.warn(e.toString());
 				response.put("errors" , true);
 				response.put("errorMessage", " Something went wrong!!!");
 			}
@@ -78,28 +90,39 @@ public class ComponentProcessorController {
 				System.out.println("controller"+isTokenValid);
 				if((boolean)isTokenValid.get("errors") == false && (boolean)isTokenValid.get("isTokenValid") == true) {
 					try {
+						
+						logger.info("User is Authorised Successfully");
 						response = accessoryComponentProcessorService.getComponentProcessingDetails(productType, qty);
 						response.put("errors", false);
-						System.out.println(response);
+						logger.info("Costing Details is as follows : "+response);
+						
 					}catch(Exception e) {
+						
+						logger.warn(e.toString());
 						response.put("errors" , true);
 						response.put("errorMessage", "Something went wrong !!!!");
 					}
 				}else {
+					
+					logger.info("User is Not Authorised Successfully !!!");
 					response.put("errors" , true);
 					response.put("errorMessage", "Authorisation failed");
 				}
 			}catch(Exception e) {
+				
+				logger.warn(e.toString());
 				response.put("errors" , true);
 				response.put("errorMessage", " Something went wrong!!!");
 			}
 		}
 		else {
+			
+			logger.warn("Invalid Arguments has been passed to the server..");
 			response.put("errors" , true);
 			response.put("errorMessage", " Invalid Arguments");
 		}
 
-		//System.out.println("validity" + isTokenValid);
+		logger.info("Response is sent back to the client");
 		return ResponseEntity.ok(response);
 	}
 	
@@ -118,25 +141,37 @@ public class ComponentProcessorController {
 				Map<String , Object> isTokenValid = componentOrderProcessorService.verifyJWTToken(jwtToken);
 				if((boolean)isTokenValid.get("errors") == false && (boolean)isTokenValid.get("isTokenValid") == true) {
 					try {
+						
+						logger.info("User is Authorised Successfully to Create an Order");
 						responseBody = componentOrderProcessorService.createReturnOrder(jso);
 						responseBody.put("errors", false);
+						
 					}catch(Exception e) {
-						System.out.println(e.toString());
+						
+						logger.warn(e.toString());
 						responseBody.put("errors" , true);
 						responseBody.put("errorMessage", "Something went wrong while recording data !!!!");
 					}
 				}else {
+					
+					logger.info("User is Not Authorised Successfully to create an order!!!");
 					responseBody.put("errors" , true);
 					responseBody.put("errorMessage", "Authorisation failed");
 				}
 			}catch(Exception e) {
+				
+				logger.warn(e.toString());
 				responseBody.put("errors" , true);
 				responseBody.put("errorMessage", " Error while creating Order");
 			}
 		}else {
+			
+			logger.info("Authorisation Server is down");
 			responseBody.put("errors" , true);
 			responseBody.put("errorMessage", "Unable to convert to order due to issues in external systems!!!");
 		}
+		
+		logger.info("Response is sent back to client Application");
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
 	}
 
