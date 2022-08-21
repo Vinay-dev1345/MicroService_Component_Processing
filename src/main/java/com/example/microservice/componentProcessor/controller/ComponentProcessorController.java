@@ -172,7 +172,13 @@ public class ComponentProcessorController {
 		}
 		
 		logger.info("Response is sent back to client Application");
-		return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+		if((boolean)responseBody.get("errors") == false) {
+			return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+		}else {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(responseBody);
+		}
+		
+		
 	}
 
 }
