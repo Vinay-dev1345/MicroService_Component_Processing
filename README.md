@@ -23,3 +23,125 @@ Uses feign client to communicate with these two services
 5. Once data is saved in database the microservice sends a success response with relevant dates which can be used by client Application to display as order process completed.
 
 ## End Points
+
+### 1. GET -> http://{{ BaseUrl }}/v1/componentproceessor/getdetails?type={{ component Type }}&quantity={{ Quantity }}
+  ```
+  Request Headers 
+    Authorization : string
+    content-type : application/json
+    Access-Control-Allow-Origin : *
+    
+  Response body
+  
+  media type : application/json
+  status : 200 OK
+
+  {
+	  errors : false
+	  requestId : String
+	  cost : {
+		processingCost : number
+		packagingAndDeliveryCost : number
+		totalCost : number
+	  }
+	  dateOfDelivery : string
+	}
+
+  ```
+  ```
+  media type : application/json
+  status : 200 OK
+  
+  {
+    "errorMessage": "Authorisation failed",
+    "errors": true
+  }
+  ```
+  
+  ```
+  media type : application/json
+  status : 200 OK
+  
+  {
+    "errorMessage": " Invalid Arguments",
+    "errors": true
+  }
+  
+  ```
+  
+### 2. POST -> http://{{ BaseUrl }}/v1/componentproceessor/createreturnorder
+  ```
+  Request Headers 
+    Authorization : string 
+    content-type : application/json
+    Access-Control-Allow-Origin : *
+  
+  Request Body
+  
+  {
+	"isConversionToOrder" : boolean,
+	"orderId" : string,
+	"customerDetails":{
+		"customerName" : string,
+		"contactNumber" : string
+	},
+	"componentDetails":{
+		"componentType" : string,
+		"componentName" : string,
+		"extraDetails" : string,
+		"qty" : int
+	},
+	"costingDetails":{
+		"packagingAndDeliveryCost" : double,
+		"processingCost" : double
+	},
+	"dateOfDelivery" : string
+  }
+  
+  ```
+  
+  Response Body
+  
+  ```
+  media type : application/json
+  status : 201 created
+  
+  {
+    "isSavedSuccessfully": boolean,
+    "orderId": string,
+    "dateOfDelivery": string,
+    "totalCost": double,
+    "errors": boolean
+  }
+  
+  ```
+  
+  ```
+  media type : application/json
+  status : 409 Conflict
+  
+  {
+    "errorMessage": string,
+    "errors": boolean
+  }
+  
+  ```
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
